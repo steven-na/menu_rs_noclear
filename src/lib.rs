@@ -142,15 +142,13 @@ impl Menu {
         let stdout = Term::buffered_stdout();
         stdout.hide_cursor().unwrap();
 
-        // clears the screen and shows the menu
-        stdout.clear_screen().unwrap();
+        // shows the menu
         self.draw_menu(&stdout);
 
         // runs the menu navigation
         self.menu_navigation(&stdout);
 
-        // clears the screen and runs the action function before exiting
-        stdout.clear_screen().unwrap();
+        // runs the action function before exiting
         stdout.flush().unwrap();
 
         // return on exit selection
@@ -166,6 +164,9 @@ impl Menu {
     fn menu_navigation(&mut self, stdout: &Term) {
         let options_limit_num: i32 = (self.options.len() - 1) as i32;
         loop {
+            stdout.clear_last_lines(self.options.len()); // Clears the options only, not other text
+                                                         // or command prompt
+
             // gets pressed key
             let key = match stdout.read_key() {
                 Ok(val) => val,
@@ -209,7 +210,7 @@ impl Menu {
 
     fn draw_menu(&self, stdout: &Term) {
         // clears the screen
-        stdout.clear_screen().unwrap();
+        //stdout.clear_screen().unwrap();
 
         // draw title
         match &self.title {
