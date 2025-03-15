@@ -1,4 +1,4 @@
-# menu_rs
+# menu_rs_noclear
 
 This is library for Rust that allows the creation of simple and interactable command-line menus.
 
