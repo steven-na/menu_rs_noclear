@@ -1,7 +1,8 @@
-//! menu_rs is a library for Rust that allows the creation of simple and interactable command-line menus.
+//! menu_rs_noclear is a fork of menu_rs, which is a library for Rust that allows the creation of simple and interactable command-line menus.
+//! noclear does not clear the screen when initially drawing the menu. It also returns the index of
+//! the selected menu option rather than running a function tied to the option
 //!
-//! It's very simple to use, you just create a Menu, adds the option you want it to have with the correspondent
-//! action to be run when selected and that's it!
+//! It's very simple to use, you just create a Menu, and add the options you want it to have
 //! You can use the arrow keys to move through the options, ENTER to select an option and ESC to exit the menu.
 //!
 //! # Example
@@ -9,27 +10,13 @@
 //! ```
 //! use menu_rs::{Menu, MenuOption};
 //!
-//! let my_variable: u32 = 157;
-//!
-//! fn action_1() {
-//!     println!("action 1")
-//! }
-//! fn action_2(val: u32) {
-//!     println!("action 2 with number {}", val)
-//! }
-//! fn action_3(msg: &str, val: f32) {
-//!     println!("action 3 with string {} and float {}", msg, val)
-//! }
-//! fn action_4() {
-//!     println!("action 4")
-//! }
 //!
 //! let menu = Menu::new(vec![
-//!     MenuOption::new("Option 1", action_1).hint("Hint for option 1"),
-//!     MenuOption::new("Option 2", || action_2(42)),
-//!     MenuOption::new("Option 3", || action_3("example", 3.14)),
-//!     MenuOption::new("Option 4", action_4),
-//!     MenuOption::new("Option 5", move || action_2(my_variable)),
+//!     MenuOption::new("Option 1").hint("Hint for option 1"),
+//!     MenuOption::new("Option 2"),
+//!     MenuOption::new("Option 3"),
+//!     MenuOption::new("Option 4"),
+//!     MenuOption::new("Option 5"),
 //! ]);
 //!
 //! menu.show();
@@ -43,7 +30,6 @@ use console::{Key, Style, Term};
 /// A option that can be added to a Menu.
 pub struct MenuOption {
     label: String,
-    func: Box<dyn FnMut()>,
     hint: Option<String>,
 }
 
@@ -66,13 +52,9 @@ impl MenuOption {
     /// fn action_example() {}
     /// let menu_option = MenuOption::new("Option example", action_example);
     /// ```
-    pub fn new<F>(label: &str, func: F) -> MenuOption
-    where
-        F: FnMut() + 'static,
-    {
+    pub fn new(label: &str) -> MenuOption {
         return MenuOption {
             label: label.to_owned(),
-            func: Box::new(func),
             hint: None,
         };
     }
@@ -82,8 +64,7 @@ impl MenuOption {
     /// # Example
     ///
     /// ```
-    /// fn action_1() {}
-    /// let menu_option_1 = MenuOption::new("Option 1", action_1).hint("Hint example");
+    /// let menu_option_1 = MenuOption::new("Option 1").hint("Hint example");
     /// ```
     pub fn hint(mut self, text: &str) -> MenuOption {
         self.hint = Some(text.to_owned());
@@ -97,24 +78,13 @@ impl Menu {
     /// # Examples
     ///
     /// ```
-    /// fn action_example() {}
-    /// let menu_option = MenuOption::new("Option example", action_example);
-    /// let menu = Menu::new(vec![menu_option]);
-    /// ```
-    ///
-    /// You can use closures to easily use arguments in your functions.
-    ///
-    /// ```
-    /// fn action_example(msg: &str, val: f32) {
-    ///     println!("action 3 with string {} and float {}", msg, val)
-    /// }
-    /// let menu_option = MenuOption::new("Option example", || action_example("example", 3.514));
+    /// let menu_option = MenuOption::new("Option example");
     /// let menu = Menu::new(vec![menu_option]);
     /// ```
     pub fn new(options: Vec<MenuOption>) -> Menu {
         return Menu {
             title: None,
-            options: options,
+            options,
             selected_option: 0,
             normal_style: Style::new(),
             selected_style: Style::new().on_blue(),
@@ -127,8 +97,7 @@ impl Menu {
     /// # Example
     ///
     /// ```
-    /// fn action_example() {}
-    /// let menu_option = MenuOption::new("Option example", action_example);
+    /// let menu_option = MenuOption::new("Option example");
     /// let menu = Menu::new(vec![menu_option]).title("Title example");
     /// ```
     pub fn title(mut self, text: &str) -> Menu {
@@ -138,7 +107,7 @@ impl Menu {
 
     /// Shows the menu in the command line interface allowing the user
     /// to interact with the menu.
-    pub fn show(mut self) {
+    pub fn show(mut self) -> i32 {
         let stdout = Term::buffered_stdout();
         stdout.hide_cursor().unwrap();
 
@@ -156,9 +125,7 @@ impl Menu {
             return;
         }
 
-        // runs the action function
-        let option = &mut self.options[self.selected_option as usize];
-        (option.func)();
+        self.selected_option
     }
 
     fn menu_navigation(&mut self, stdout: &Term) {
