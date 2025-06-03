@@ -122,7 +122,7 @@ impl Menu {
 
         // return on exit selection
         if self.selected_option == -1 {
-            return;
+            return -1;
         }
 
         self.selected_option
