@@ -1,9 +1,9 @@
 [package]
-name = "menu_rs"
+name = "menu_rs_noclear"
 version = "0.3.1"
 edition = "2021"
 keywords = ["menu", "terminal", "console", "cli"]
-authors = ["NFSS10"]
+authors = ["NFSS10", "steven-na"]
 description = "A simple command line menu"
 license = "Apache-2.0"
 homepage = "https://github.com/NFSS10/menu_rs"
